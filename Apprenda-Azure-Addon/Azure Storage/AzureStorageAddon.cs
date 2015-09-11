@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using Microsoft.Azure;
 using Microsoft.WindowsAzure.Management.Storage;
@@ -15,11 +16,11 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
             {
                 var devParameters = DeveloperParameters.Parse(request.DeveloperParameters, request.Manifest.GetProperties());
 
-                SubscriptionCloudCredentials creds = CertificateAuthenticationHelper.GetCredentials(devParameters.AzureManagementSubscriptionId, devParameters.AzureAuthenticationKey);
+                SubscriptionCloudCredentials creds = CertificateAuthenticationHelper.GetCredentials(devParameters.AzureManagementSubscriptionId, devParameters.AzureAuthenticationKey, devParameters.PFXPassword);
 
                 // ok so if we need a storage account, we need to use the storage management client.
                 if (devParameters.NewStorageAccountFlag)
-                {
+                { 
                     var client = new StorageManagementClient(creds);
                     var parameters = CreateStorageAccountParameters(devParameters);
                     client.StorageAccounts.Create(parameters);
@@ -63,7 +64,8 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
                 Description = developerOptions.Description,
                 Location = developerOptions.Location,
                 Label = developerOptions.StorageAccountName,
-                Name = developerOptions.StorageAccountName
+                Name = developerOptions.StorageAccountName,
+                AccountType = "Standard_LRS"
             };
             if (developerOptions.AffinityGroup != null)
             {
@@ -86,16 +88,20 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
             var deprovisionResult = new ProvisionAddOnResult(connectionData);
             var devOptions = DeveloperParameters.Parse(request.DeveloperParameters, request.Manifest.GetProperties());
             // set up the credentials for azure
-            SubscriptionCloudCredentials creds = CertificateAuthenticationHelper.GetCredentials(devOptions.AzureManagementSubscriptionId, devOptions.AzureAuthenticationKey);
+            SubscriptionCloudCredentials creds = CertificateAuthenticationHelper.GetCredentials(devOptions.AzureManagementSubscriptionId, devOptions.AzureAuthenticationKey, devOptions.PFXPassword);
             // set up the storage management client
             var client = new StorageManagementClient(creds);
 
-
-            // AI-121 & AI-122
-            // we're going to have to implement some additional handling here, including parsing of the connection data
-            // i strongly recommend we look at putting this in json
-
-
+            // check to see if the storage accounts exists...if they do not exist, throw a no-op here.
+            var account = client.StorageAccounts.Get(devOptions.StorageAccountName);
+            if (account.StatusCode.Equals(HttpStatusCode.NotFound))
+            {
+                // no account found. return a no-op as something went wrong, proceed to deletion
+                deprovisionResult.IsSuccess = true;
+                deprovisionResult.EndUserMessage = "Storage account not found, may have been deleted via 3rd party.";
+                return deprovisionResult;
+            }
+            
             // then if requested, delete the storage account name
             client.StorageAccounts.Delete(devOptions.StorageAccountName);
 
@@ -127,7 +133,7 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
             {
                 var devOptions = DeveloperParameters.Parse(developerParams, manifest.GetProperties());
                 var creds = CertificateAuthenticationHelper.GetCredentials(devOptions.AzureManagementSubscriptionId,
-                    devOptions.AzureAuthenticationKey);
+                    devOptions.AzureAuthenticationKey, devOptions.PFXPassword);
                 try
                 {
                     testProgress += "Establishing connection to Azure...\n";
@@ -135,7 +141,7 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
 
                     var client = new StorageManagementClient(creds);
 
-                    var listOfStorageAccounts = client.StorageAccounts.List();
+                    //var listOfStorageAccounts = client.StorageAccounts.List();
 
                     testProgress += "Successfully passed all testing criteria!";
                     testResult.IsSuccess = true;

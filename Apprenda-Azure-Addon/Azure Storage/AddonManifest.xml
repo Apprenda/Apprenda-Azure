@@ -10,13 +10,14 @@
                vendor="Apprenda"
                author="Chris Dutra"
                version="1.1.0"
-               provisioningUsername="fluffy@apprenda.com"
-               provisioningPassword="password"
+               provisioningUsername=""
+               provisioningPassword=""
                provisioningLocation=""
                manifestVersion="2">
   <properties>
     <property key="AzureManagementSubscriptionID" displayName="Azure Management Subscription ID" description="" value="" />
-    <property key="AzureAuthenticationKey" displayName="Azure Management Auth Key" description="" value=""/>
+    <property key="AzureManagementCertificateFile" displayName="Path to PFX Key" description="" value=""/>
+    <property key="AzureManagementPFXPassword" displayName="Password for PFX" description="" value=""/>
     <property key="AzureURL" displayName="Your Azure URL" description="" value="https://management.core.windows.net"/>
     <property key="GeoReplicationEnabled" displayName="Geo Replication Option" description="Set to false if you do not want your storage replicated globally. Default is true." value="true"/>
     <property key="Location" displayName="Azure Storage Location" description="The location of the storage account you are referencing/creating." value="East US"/>

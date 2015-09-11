@@ -8,8 +8,8 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
         private string DeveloperAlias { get; set; }
         internal string AffinityGroup { get; private set; }
         internal string Description { get; private set; }
-        internal bool GeoReplicationEnabled { get; private set; }
-        internal String StorageAccountName { get; set; }
+        private bool GeoReplicationEnabled { get; set; }
+        internal string StorageAccountName { get; set; }
         internal string AzureManagementSubscriptionId { get; private set; }
         internal string AzureAuthenticationKey { get; private set; }
         private string AzureUrl { get; set; }
@@ -17,6 +17,7 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
         private string DeveloperId { get; set; }
         internal bool NewStorageAccountFlag { get; private set; }
         internal string ContainerName { get; private set; }
+        internal string PFXPassword { get; private set; }
 
         public static DeveloperParameters Parse(IEnumerable<AddonParameter> parameters, IEnumerable<IAddOnPropertyDefinition> manifestProperties)
         {
@@ -39,7 +40,7 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
             return options;
         }
 
-        private static DeveloperParameters MapToOption(DeveloperParameters options, String key, String value)
+        private static DeveloperParameters MapToOption(DeveloperParameters options, string key, string value)
         {
             if("newstorageaccount".Equals(key))
             {
@@ -66,11 +67,17 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
                 options.AzureManagementSubscriptionId = value;
                 return options;
             }
-            if ("azureauthenticationkey".Equals(key))
+            if ("azuremanagementcertificatefile".Equals(key))
             {
                 options.AzureAuthenticationKey = value;
                 return options;
             }
+            if ("azuremanagementpfxpassword".Equals(key))
+            {
+                options.PFXPassword = value;
+                return options;
+            }
+
             if ("azureurl".Equals(key))
             {
                 options.AzureUrl = value;
@@ -109,6 +116,10 @@ namespace Apprenda.SaaSGrid.Addons.Azure.Storage
             if ("developeralias".Equals(key))
             {
                 options.DeveloperAlias = value;
+                return options;
+            }
+            if("instancealias".Equals(key))
+            {
                 return options;
             }
             throw new ArgumentException(string.Format("The option provided '{0}' does not parse, please try your request again.", key));

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
-using NUnit.Framework;
 using static Apprenda.SaaSGrid.Addons.Azure.Storage.DeveloperParameters;
 
 namespace Apprenda.SaaSGrid.Addons.Azure.Storage
